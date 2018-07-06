@@ -16,12 +16,11 @@
     import updateData from '../../../common/mixins/UpdateData'
     import getClassification from './mixins/getClassification'
     import {marketFetch} from '../config/fetchUtil'
-    import loading from '../../../common/mixins/loading'
 
     export default {
         name: 'Search',
         props: [],
-        mixins: [updateData, getClassification, loading(marketFetch)],
+        mixins: [updateData, getClassification],
         data () {
             return {
                 value: '',
@@ -29,7 +28,8 @@
                     chooseValue: [],
                     chooseList: []
                 },
-                isFocus: false
+                isFocus: false,
+                fetch: marketFetch
             }
         },
         watch: {

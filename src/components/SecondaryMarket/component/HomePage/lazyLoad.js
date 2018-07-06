@@ -43,7 +43,7 @@ export default {
             // 这样可以避免用户向上滚动加载额外数据的BUG
             // scrollTop是浮点相等不了
             this.scrollTop = scrollTop
-            if (windowHeight > this.scrollTop + documentHeight - 30 && windowHeight < this.scrollTop + documentHeight + 30 && !this.restoring) {
+            if (windowHeight > this.scrollTop + documentHeight - 30 && windowHeight < this.scrollTop + documentHeight + 30) {
                 this.fetchNextPage()
             }
         }

@@ -43,7 +43,11 @@ const eventListen = (nativeConsole, type, ...args) => {
         date: new Date().toLocaleString(),
         stack: new Error().stack
     })
-    window.localStorage.logMessage = JSON.stringify(logMessage)
+    try {
+        window.localStorage.logMessage = JSON.stringify(logMessage)
+    } catch (e) {
+        window.localStorage.logMessage = '[]'
+    }
 }
 consoleListen.addConsoleListen('before', eventListen)
 export default consoleListen

@@ -3,19 +3,20 @@ function loading (httpRequest) {
     return {
         data: function () {
             return {
-                loadState: false,
+                waittingFetchNumber: 0,
                 fetch: httpRequest
             }
         },
         methods: {
             showLoading () {
-                this.loadState = true
+                this.waittingFetchNumber += 1
             },
-            hiddenLoading () {
-                this.loadState = false
+            hiddenLoading (data) {
+                this.waittingFetchNumber -= 1
             }
         },
         created () {
+            console.log('绑定监听事件')
             this.fetch.addFetchListen('before', this.showLoading)
             this.fetch.addFetchListen('after', this.hiddenLoading)
         },

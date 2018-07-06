@@ -4,7 +4,7 @@
             <p>跳蚤市场</p>
         </header-section>
         <search @fetchSearch="fetchSearch"></search>
-        <load-image :loadState="loadState"></load-image>
+        <load-image :loadState="waittingFetchNumber !== 0"></load-image>
         <hr style="border: 1px solid #EBEBEB;border-bottom: none" v-if="!(pageList.length <= 0 || pageList[0].managerList.length <= 0)">
         <p v-if="pageList.length <= 0 || pageList[0].managerList.length <= 0" style="color: rgb(179, 167, 167);font-size: 0.7rem;margin-top: 1rem" class="text-center">
             没有搜索结果
@@ -20,29 +20,9 @@
                 </router-link>
             </div>
         </div>
-        <load-image :loadState="loadState"></load-image>
+        <load-image :loadState="waittingFetchNumber !== 0"></load-image>
         <div style="height: 6rem;"></div>
-        <div class="footer absolute-horizontal-center">
-            <ul class="clear">
-                <li class="float-left" @click="backTop">
-                    <img :src="find">
-                    <p>发现</p>
-                </li>
-                <li class="float-left add">
-                    <router-link to="/second/publish" class="absolute-horizontal-center" style="display: block">
-                        <span>+</span>
-                    </router-link>
-                    <img style="opacity: 0;" src="">
-                    <p>发布</p>
-                </li>
-                <li class="float-left">
-                    <router-link to="/second/user-center">
-                        <img :src="user">
-                        <p>我的</p>
-                    </router-link>
-                </li>
-            </ul>
-        </div>
+        <footer-section current-page="find"></footer-section>
     </div>
 </template>
 
@@ -51,13 +31,14 @@
     import LoadImage from '../../../../common/components/LoadImage.vue'
     import ManagerSection from './ManagerSection/index.vue'
     import HeaderSection from '../../common-component/HeaderSection.vue'
+    import FooterSection from '../../common-component/footerSection.vue'
     import updateData from '../../../../common/mixins/UpdateData'
     import loading from '../../../../common/mixins/loading'
     import checkExistence from '../../common-component/mixins/checkExistence'
     import fetchVq from '../../../../common/mixins/fetchVq'
     import {marketFetch, yibanAuth} from '../../config/fetchUtil'
     import getManagerList, {createItem} from '../../fetch/getManagerList'
-    import lazyLoad from '../../common-component/mixins/lazyLoad'
+    import lazyLoad from './lazyLoad'
 
     export default {
         name: 'HomePage',
@@ -75,31 +56,35 @@
             }
         },
         created () {
-            this.restoreData().then(status => {
-                if (status.fromRestore) {
-                    const pageData = JSON.parse(status.pageList)
-                    this.nextPageNumber = parseInt(status.nextPageNumber)
+            if (window.sessionStorage.fromRestore) {
+                this.restoreData().then(status => {
+                    console.log(status)
+                    const pageData = status.pageList
+                    this.nextPageNumber = status.nextPageNumber
                     pageData.forEach(page => {
                         this.addPage(page)
                     })
                     window.scroll(0, parseInt(status.scroll))
-                } else {
-                    this.getManagerList(0).then(data => this.addPage(data))
-                }
-            })
+                })
+            } else {
+                this.getManagerList(0).then(data => this.addPage(data))
+            }
         },
         beforeDestroy () {
-            let status = {}
-            status.pageList = JSON.stringify(this.pageList)
-            status.nextPageNumber = this.nextPageNumber
-            status.scroll = this.scrollTop ? this.scrollTop : 0
-            status.expire = new Date().getTime() + 600 * 1000
-            status.fromRestore = true
-            window.sessionStorage.status = JSON.stringify(status)
+            if (this.flag) {
+                let status = {}
+                status.pageList = this.pageList
+                status.nextPageNumber = this.nextPageNumber
+                status.scroll = this.scrollTop ? this.scrollTop : 0
+                status.expire = new Date().getTime() + 1000 * 600
+                window.sessionStorage.fromRestore = true
+                window.sessionStorage.status = JSON.stringify(status)
+            }
         },
         components: {
             ManagerSection,
             HeaderSection,
+            FooterSection,
             Search,
             LoadImage
         },
@@ -140,6 +125,18 @@
                     const status = JSON.parse(window.sessionStorage.status)
                     if (status.expire >= new Date().getTime()) resolve(status)
                     else resolve(false)
+                }).then(status => {
+                    if (status === false) {
+                        return this.getManagerList(0).then(json => {
+                            this.addPage(json)
+                            return {
+                                pageList: this.pageList,
+                                nextPageNumber: 1
+                            }
+                        })
+                    } else {
+                        return status
+                    }
                 })
             },
             getManagerList

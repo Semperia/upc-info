@@ -65,13 +65,15 @@ class HttpRequest {
         } else if (method.toUpperCase() === 'POST') {
             fetchData = this._postData.bind(this)
         } else {
+            // TODO  需要尽快支持PUT和DELETE方法
             return console.log('不支持提交put与delete方法')
         }
         this._fetchBefore && this._fetchBefore.forEach(item => item(url, body))
         return fetchData(url, body)
             .catch(r => {
                 console.log(r.toString())
-                return this._fetchError && this._fetchError.forEach(item => item(r))
+                this._fetchError && this._fetchError.forEach(item => item(r))
+                return r
             }).then(data => {
                 this._fetchAfter && this._fetchAfter.forEach(item => item(data))
                 return data

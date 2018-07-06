@@ -3,7 +3,7 @@
         <header-section>
             <p> {{ title }}</p>
         </header-section>
-        <load-image :loadState="loadState"></load-image>
+        <load-image :loadState="waittingFetchNumber !== 0"></load-image>
         <input-box ref="title" type="text" placeholder="标题" @userInput="updateData" dataKey="managerTitle" :value="managerTitle" class="input-box box-center"></input-box>
         <input-box ref="price" type="text" placeholder="价格" @userInput="updateData" dataKey="managerPrice" :value="managerPrice" class="input-box box-center"></input-box>
         <br>

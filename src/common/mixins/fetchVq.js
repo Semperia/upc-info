@@ -12,6 +12,7 @@ function fetchVq (yibanAuth) {
             }
         },
         created () {
+            console.log('获取vq')
             this.yibanAuth && this.yibanAuth.fetchVq()
             document.querySelector('title').innerHTML = this.title
         }
